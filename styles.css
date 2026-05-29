@@ -432,9 +432,9 @@ button, a {
 
 /* Inputs, buttons and micro-interactions */
 :root {
-  --anim-fast: 120ms;
-  --anim-medium: 220ms;
-  --anim-slow: 420ms;
+  --anim-fast: 90ms;
+  --anim-medium: 160ms;
+  --anim-slow: 300ms;
 }
 
 /* Button motion and focus */
@@ -444,7 +444,7 @@ button, a {
   will-change: transform;
 }
 .button:hover {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
 }
 .button:active {
   transform: translateY(-2px) scale(0.997);
@@ -470,7 +470,7 @@ input:focus, textarea:focus, select:focus {
 /* Subtle floating for hero glow */
 @keyframes floatY {
   0% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
   100% { transform: translateY(0); }
 }
 .hero-glow {
@@ -528,7 +528,7 @@ input:focus, textarea:focus, select:focus {
 
 /* subtle tilt on hover for interactive cards */
 .card:hover {
-  transform: translateY(-8px) rotateZ(-0.3deg) scale(1.01);
+  transform: translateY(-6px) rotateZ(-0.15deg) scale(1.008);
 }
 
 /* small transition for nav links */
@@ -536,7 +536,7 @@ input:focus, textarea:focus, select:focus {
   transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 .main-nav a:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 
@@ -555,7 +555,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .nav-card:hover {
-  transform: translateY(-8px) scale(1.01);
+  transform: translateY(-5px) scale(1.008);
   border-image: linear-gradient(90deg, rgba(124,58,237,0.9), rgba(236,72,153,0.7)) 1;
   border-color: transparent;
 }
