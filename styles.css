@@ -429,6 +429,53 @@ button, a {
     justify-content: center;
   }
 }
+
+/* Modern rounded overrides */
+:root {
+  --radius-sm: 1rem;
+  --radius-md: 1.5rem;
+  --radius-lg: 2.5rem;
+}
+
+/* Larger rounded corners for panels and cards */
+.card,
+.nav-card,
+.payment-card,
+.contact-card,
+.process-card,
+.faq-item,
+.cart-item,
+.cart-empty,
+.auth-card,
+.hero-panel,
+.paypal-section,
+.site-footer {
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Medium radius for inputs, buttons and small controls */
+.checkout-form input,
+.checkout-form textarea,
+.login-form input,
+.register-form input,
+.social-button {
+  border-radius: var(--radius-md) !important;
+}
+
+.process-list li {
+  border-radius: 1.5rem !important;
+}
+
+.hero-section::before,
+.hero-glow {
+  border-radius: 3rem !important;
+}
+
+/* Ensure contrast and smooth corners on small elements */
+.toast-message {
+  border-radius: 1.25rem !important;
+}
+
 .faq-item p {
   margin: 1rem 0 0;
   color: #cbd5e1;
