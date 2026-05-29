@@ -1,5 +1,21 @@
 const AUTH_USERS_KEY = 'wr3d-users';
 const CURRENT_USER_KEY = 'wr3d-current-user';
+const ADMIN_ACCOUNTS = [
+  {
+    name: 'Wendel Menezes',
+    email: 'menezeswendel@gmail.com',
+    password: 'WR3Dwendelruth204657',
+    admin: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    name: 'Vitor Mendes',
+    email: 'vitorhugomendesmenezes@gmail.com',
+    password: 'WR3Dvitordev204657',
+    admin: true,
+    createdAt: new Date().toISOString(),
+  },
+];
 
 const authMessageEl = document.getElementById('auth-message');
 const loginForm = document.getElementById('login-form');
@@ -28,6 +44,22 @@ function getCurrentUser() {
     return JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
   } catch (error) {
     return null;
+  }
+}
+
+function ensureAdminAccounts() {
+  const users = getUsers();
+  let changed = false;
+
+  ADMIN_ACCOUNTS.forEach((admin) => {
+    if (!users.find((user) => user.email === admin.email)) {
+      users.push(admin);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    setUsers(users);
   }
 }
 
@@ -201,6 +233,8 @@ function handleForgotPassword(event) {
 }
 
 function initializeAuth() {
+  ensureAdminAccounts();
+
   if (!loginForm || !registerForm || !authMessageEl) {
     return;
   }

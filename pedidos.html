@@ -1,97 +1,78 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang='pt-BR'>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Como Pedir | WR3D</title>
-  <meta name="description" content="Saiba como fazer um pedido de impressão 3D pela WR3D - processo simples em 3 passos.">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Meus Pedidos | WR3D</title>
+  <meta name='description' content='Veja seu histórico de pedidos WR3D e acompanhe o status das encomendas.'>
+  <link rel='stylesheet' href='styles.css'>
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <span class="brand-mark">WR3D</span>
-      <div class="brand-copy">
+  <header class='site-header'>
+    <div class='brand'>
+      <span class='brand-mark'>WR3D</span>
+      <div class='brand-copy'>
         <strong>WR 3D Prints</strong>
         <span>Encomendas 3D de alta qualidade e entrega conectada.</span>
       </div>
     </div>
-    <nav class="main-nav">
-      <a href="index.html">Início</a>
-      <a href="produtos.html">Produtos</a>
-      <a href="order.html">Carrinho</a>
-      <a href="pedidos.html">Pedidos</a>
-      <a href="pagamentos.html">Pagamentos</a>
-      <a href="contato.html">Contato</a>
-      <a href="login.html">Login</a>
+    <nav class='main-nav'>
+      <a href='index.html'>Início</a>
+      <a href='produtos.html'>Produtos</a>
+      <a href='order.html'>Carrinho</a>
+      <a href='pedidos.html'>Pedidos</a>
+      <a href='pagamentos.html'>Pagamentos</a>
+      <a href='contato.html'>Contato</a>
+      <a href='login.html'>Login</a>
     </nav>
   </header>
-
   <main>
-    <section class="section">
-      <div class="section-header">
-        <span>Processo</span>
-        <h1>3 passos para transformar sua ideia em produção 3D</h1>
+    <section class='section'>
+      <div class='section-header'>
+        <span>Pedidos</span>
+        <h1>Histórico de pedidos</h1>
       </div>
-      <div class="process-grid">
-        <div class="process-card">
-          <span class="step-number">1</span>
-          <h3>Escolha ou descreva seu projeto</h3>
-          <p>Selecione um modelo do nosso catálogo ou envie um projeto personalizado com especificações detalhadas de tamanho, material e acabamento.</p>
-        </div>
-        <div class="process-card">
-          <span class="step-number">2</span>
-          <h3>Fale com nosso time via WhatsApp</h3>
-          <p>Envie suas dúvidas, detalhes de material, prazo preferencial e quantidade. Receba um orçamento personalizado em minutos.</p>
-        </div>
-        <div class="process-card">
-          <span class="step-number">3</span>
-          <h3>Acompanhamento e entrega</h3>
-          <p>Após a confirmação do pagamento, sua peça entra em produção. Você acompanha o progresso e recebe sua peça pronta para uso.</p>
-        </div>
-      </div>
+      <p style='max-width: 640px; color: #475569;'>Acompanhe seus pedidos recentes e veja o status de cada encomenda. Administradores podem visualizar todos os pedidos.</p>
     </section>
-
-    <section class="section">
-      <div class="section-header">
-        <h2>O que considerar ao pedir</h2>
-      </div>
-      <div class="cards-grid">
-        <article class="card">
-          <h3>Material</h3>
-          <p>Disponemos de PLA, ABS, PETG e materiais especiais. Cada um tem características de resistência e acabamento diferentes.</p>
-        </article>
-        <article class="card">
-          <h3>Tamanho</h3>
-          <p>Dimensões de até 30cm em qualquer direção. Peças maiores requerem divisão em partes que serão encaixadas.</p>
-        </article>
-        <article class="card">
-          <h3>Prazo</h3>
-          <p>Produtos do catálogo: 10-24h. Projetos personalizados: 2-5 dias dependendo da complexidade.</p>
-        </article>
-        <article class="card">
-          <h3>Acabamento</h3>
-          <p>Oferecemos pintura, lixamento fino, polimento e outros acabamentos para melhorar a aparência final.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section accent">
-      <div class="section-header">
-        <h2>Pronto para começar?</h2>
-      </div>
-      <a class="button primary" href="https://wa.me/5561996232331?text=Gostaria%20de%20fazer%20um%20pedido%20de%20impressão%203D" target="_blank" rel="noreferrer">Fazer um pedido agora</a>
+    <section class='section'>
+      <div id='orders-list' class='cards-grid'></div>
     </section>
   </main>
-
-  <footer class="site-footer">
+  <footer class='site-footer'>
     <div>
       <strong>WR3D</strong>
-      <p>Contato direto pelo WhatsApp: <a href="https://wa.me/5561996232331" target="_blank" rel="noreferrer">61 99623-2331</a></p>
+      <p>Contato direto pelo WhatsApp: <a href='https://wa.me/5561996232331' target='_blank' rel='noreferrer'>61 99623-2331</a></p>
     </div>
     <p>Impressão 3D sob medida, pronta para envio ou entrega local.</p>
   </footer>
-  <script src="auth.js"></script>
-  <script src="site.js"></script>
+  <script src='auth.js'></script>
+  <script>
+    (function seedOrders() {
+      try {
+        const key = 'wr3d-orders';
+        if (!localStorage.getItem(key)) {
+          const sample = [{
+            id: 'ORD-' + Date.now(),
+            createdAt: new Date().toISOString(),
+            buyerName: 'Cliente Teste',
+            buyerEmail: 'teste@example.com',
+            method: 'WhatsApp',
+            status: 'Pendente',
+            total: 149.9,
+            notes: 'Favor entregar à tarde.',
+            items: [
+              { id: 'p1', name: 'Miniatura 3D - Cavaleiro', quantity: 1, price: 99.9 },
+              { id: 'p2', name: 'Suporte 3D', quantity: 1, price: 50.0 }
+            ]
+          }];
+          localStorage.setItem(key, JSON.stringify(sample));
+          console.log('WR3D: sample order injected');
+        }
+      } catch (e) {
+        console.warn('WR3D: failed to seed orders', e);
+      }
+    })();
+  </script>
+  <script src='site.js'></script>
 </body>
 </html>

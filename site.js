@@ -1,23 +1,37 @@
 const CART_KEY = 'wr3d-cart';
+const PRODUCTS_KEY = 'wr3d-products';
+const ORDERS_KEY = 'wr3d-orders';
 
-const products = [
+const DEFAULT_PRODUCTS = [
   {
     id: 'miniaturas',
     name: 'Miniaturas de jogos',
     description: 'Peças detalhadas e resistentes para colecionadores e circuito de RPG.',
     price: 120,
+    image: 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=80',
+    gramatura: '50g',
+    productionTime: '18h',
+    complexity: 'Média',
   },
   {
     id: 'tecnicas',
     name: 'Peças técnicas',
     description: 'Componentes funcionais com acabamento limpo para uso real.',
     price: 180,
+    image: 'https://images.unsplash.com/photo-1581091870620-3c9ba9ba1d6b?auto=format&fit=crop&w=800&q=80',
+    gramatura: '80g',
+    productionTime: '24h',
+    complexity: 'Alta',
   },
   {
     id: 'acessorios',
     name: 'Suportes e acessórios',
     description: 'Organizadores, ganchos e itens sob medida para uso doméstico ou industrial.',
     price: 95,
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80',
+    gramatura: '40g',
+    productionTime: '10h',
+    complexity: 'Baixa',
   },
 ];
 
@@ -37,8 +51,43 @@ function clearCart() {
   setCart([]);
 }
 
+function getProducts() {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed) && parsed.length) {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn('Falha ao ler produtos de localStorage:', error);
+  }
+  return [...DEFAULT_PRODUCTS];
+}
+
+function setProducts(products) {
+  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+}
+
+function getOrders() {
+  try {
+    return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function setOrders(orders) {
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+}
+
+function saveOrder(order) {
+  const orders = getOrders();
+  orders.unshift(order);
+  setOrders(orders);
+}
+
 function findProduct(id) {
-  return products.find((product) => product.id === id);
+  return getProducts().find((product) => product.id === id);
 }
 
 function addToCart(productId) {
@@ -209,6 +258,26 @@ function renderPayPalButtons() {
     onApprove(data, actions) {
       return actions.order.capture().then((details) => {
         const payerName = details.payer?.name?.given_name || 'Cliente';
+        const email = document.getElementById('checkout-email').value.trim();
+        const cart = getCart();
+        const total = getCartTotal();
+
+        saveOrder({
+          id: `order-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          method: 'PayPal',
+          status: 'Pago',
+          buyerName: payerName,
+          buyerEmail: email,
+          total,
+          items: cart.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        });
+
         showTemporaryMessage(`Pagamento confirmado. Obrigado, ${payerName}!`, 'success');
         clearCart();
         renderOrderPage();
@@ -219,6 +288,46 @@ function renderPayPalButtons() {
       showTemporaryMessage('Não foi possível processar o pagamento PayPal. Tente novamente.', 'error');
     },
   }).render('#paypal-button-container');
+}
+
+function renderProductCatalog() {
+  const productGrid = document.getElementById('product-grid');
+  if (!productGrid) {
+    return;
+  }
+
+  const products = getProducts();
+  if (!products.length) {
+    productGrid.innerHTML = '<p>Nenhum produto disponível no momento.</p>';
+    return;
+  }
+
+  productGrid.innerHTML = products
+    .map(
+      (product) => `
+        <article class="card">
+          <img src="${product.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'}" alt="${product.name}" loading="lazy">
+          <h3>${product.name}</h3>
+          <p>${product.description}</p>
+          <div class="meta">Gramatura ${product.gramatura || '-'} • Complexidade ${product.complexity || '-'} • ${product.productionTime || '-'} </div>
+          <div class="meta price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
+          <div class="card-actions">
+            <a class="button secondary" href="https://wa.me/5561996232331?text=Tenho%20interesse%20no%20produto%20${encodeURIComponent(product.name)}" target="_blank" rel="noreferrer">Consultar</a>
+            <a class="button primary add-to-cart" href="order.html?add=${product.id}" data-product="${product.id}">Adicionar ao pedido</a>
+          </div>
+        </article>
+      `
+    )
+    .join('');
+
+  productGrid.querySelectorAll('.add-to-cart').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      if (button.dataset.product) {
+        event.preventDefault();
+        addToCart(button.dataset.product);
+      }
+    });
+  });
 }
 
 function buildWhatsAppOrderMessage() {
@@ -258,6 +367,28 @@ function submitWhatsAppOrder(event) {
     return;
   }
 
+  const name = document.getElementById('checkout-name').value.trim();
+  const email = document.getElementById('checkout-email').value.trim();
+  const details = document.getElementById('checkout-notes').value.trim();
+  const total = getCartTotal();
+
+  saveOrder({
+    id: `order-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    method: 'WhatsApp',
+    status: 'Solicitado',
+    buyerName: name,
+    buyerEmail: email,
+    notes: details,
+    total,
+    items: cart.map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+    })),
+  });
+
   const message = buildWhatsAppOrderMessage();
   if (!message) {
     return;
@@ -278,6 +409,49 @@ function addItemFromUrl() {
   window.history.replaceState(null, '', `${window.location.pathname}`);
 }
 
+function renderOrdersPage() {
+  const ordersContainer = document.getElementById('orders-list');
+  if (!ordersContainer) {
+    return;
+  }
+
+  const currentUser = getCurrentUser();
+  let orders = getOrders();
+
+  if (!currentUser?.admin) {
+    orders = orders.filter((order) => order.buyerEmail?.toLowerCase() === currentUser?.email?.toLowerCase());
+  }
+
+  if (!orders.length) {
+    ordersContainer.innerHTML = `
+      <div class="cart-empty">
+        <p>Nenhum pedido encontrado.</p>
+        <a class="button primary" href="produtos.html">Fazer um pedido</a>
+      </div>
+    `;
+    return;
+  }
+
+  ordersContainer.innerHTML = orders
+    .map((order) => `
+      <article class="card order-card">
+        <div class="order-header">
+          <strong>Pedido ${order.id}</strong>
+          <span>${new Date(order.createdAt).toLocaleString('pt-BR')}</span>
+        </div>
+        <div class="meta">${order.method} • ${order.status} • R$ ${order.total.toFixed(2).replace('.', ',')}</div>
+        <div class="order-buyer">${order.buyerName} • ${order.buyerEmail}</div>
+        <ul class="order-items">
+          ${order.items
+            .map((item) => `<li>${item.name} x${item.quantity} — R$ ${item.price.toFixed(2).replace('.', ',')}</li>`)
+            .join('')}
+        </ul>
+        ${order.notes ? `<p><em>Observações:</em> ${order.notes}</p>` : ''}
+      </article>
+    `)
+    .join('');
+}
+
 function updateHeaderAuth() {
   const currentUser = getCurrentUser();
   const nav = document.querySelector('.main-nav');
@@ -286,11 +460,13 @@ function updateHeaderAuth() {
   }
 
   const existingLogout = document.getElementById('logout-link');
+  const existingAdmin = document.getElementById('admin-link');
+  const loginLink = nav.querySelector('a[href="login.html"]');
+
   if (currentUser) {
-    const currentNavLink = nav.querySelector('a[href="login.html"]');
-    if (currentNavLink) {
-      currentNavLink.textContent = 'Minha Conta';
-      currentNavLink.href = 'login.html';
+    if (loginLink) {
+      loginLink.textContent = 'Minha Conta';
+      loginLink.href = 'login.html';
     }
 
     if (!existingLogout) {
@@ -304,12 +480,32 @@ function updateHeaderAuth() {
       });
       nav.appendChild(logoutLink);
     }
-  } else if (existingLogout) {
-    existingLogout.remove();
+
+    if (currentUser.admin && !existingAdmin) {
+      const adminLink = document.createElement('a');
+      adminLink.id = 'admin-link';
+      adminLink.href = 'admin.html';
+      adminLink.textContent = 'Admin';
+      nav.appendChild(adminLink);
+    } else if (!currentUser.admin && existingAdmin) {
+      existingAdmin.remove();
+    }
+  } else {
+    if (loginLink) {
+      loginLink.textContent = 'Login';
+      loginLink.href = 'login.html';
+    }
+    if (existingLogout) {
+      existingLogout.remove();
+    }
+    if (existingAdmin) {
+      existingAdmin.remove();
+    }
   }
 }
 
 function initializeSite() {
+  renderProductCatalog();
   updateCartIndicator();
   updateHeaderAuth();
 
@@ -330,6 +526,10 @@ function initializeSite() {
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', submitWhatsAppOrder);
     }
+  }
+
+  if (window.location.pathname.endsWith('pedidos.html')) {
+    renderOrdersPage();
   }
 }
 
