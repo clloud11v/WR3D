@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pedido | WR3D</title>
-  <meta name="description" content="Finalize seu pedido de impressão 3D com carrinho, detalhes e envio via WhatsApp.">
+  <meta name="description" content="Finalize seu pedido de impressão 3D com carrinho, detalhes e checkout rápido.">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://www.paypal.com/sdk/js?client-id=test&currency=BRL" data-sdk-integration-source="button-factory"></script>
 </head>
 <body>
   <header class="site-header">
@@ -63,6 +64,11 @@
                 <textarea id="checkout-notes" rows="4" placeholder="Tamanho, cor, acabamento, etc."></textarea>
               </label>
               <button type="submit" class="button primary">Enviar pedido pelo WhatsApp</button>
+            <div class="paypal-section">
+              <p>Ou pague agora com PayPal:</p>
+              <div id="paypal-button-container"></div>
+              <p class="paypal-note">Use a opção de checkout PayPal para pagamento online seguro. Substitua o client-id em produção.</p>
+            </div>
             </form>
           </div>
         </aside>

@@ -95,6 +95,7 @@ function renderOrderPage() {
   const cartContainer = document.getElementById('cart-items');
   const cartEmpty = document.getElementById('cart-empty');
   const orderTotal = document.getElementById('order-total');
+  const paypalSection = document.querySelector('.paypal-section');
 
   if (!cartContainer || !cartEmpty || !orderTotal) {
     return;
@@ -104,10 +105,16 @@ function renderOrderPage() {
     cartEmpty.style.display = 'block';
     cartContainer.innerHTML = '';
     orderTotal.textContent = 'R$ 0,00';
+    if (paypalSection) {
+      paypalSection.style.display = 'none';
+    }
     return;
   }
 
   cartEmpty.style.display = 'none';
+  if (paypalSection) {
+    paypalSection.style.display = 'block';
+  }
 
   cartContainer.innerHTML = cart
     .map(
@@ -132,6 +139,86 @@ function renderOrderPage() {
   cartContainer.querySelectorAll('.remove-item').forEach((button) => {
     button.addEventListener('click', () => removeFromCart(button.dataset.product));
   });
+}
+
+function getCartTotal() {
+  const cart = getCart();
+  return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+}
+
+function renderPayPalButtons() {
+  const container = document.getElementById('paypal-button-container');
+  if (!container) {
+    return;
+  }
+
+  if (!window.paypal) {
+    setTimeout(renderPayPalButtons, 200);
+    return;
+  }
+
+  if (container.children.length) {
+    return;
+  }
+
+  window.paypal.Buttons({
+    style: {
+      layout: 'vertical',
+      color: 'gold',
+      shape: 'rect',
+      label: 'paypal',
+    },
+    onInit(data, actions) {
+      const cart = getCart();
+      if (!cart.length) {
+        actions.disable();
+      }
+      return actions;
+    },
+    onClick(data, actions) {
+      const cart = getCart();
+      if (!cart.length) {
+        showTemporaryMessage('Adicione produtos ao carrinho antes de pagar.', 'error');
+        return actions.reject();
+      }
+      const name = document.getElementById('checkout-name').value.trim();
+      const email = document.getElementById('checkout-email').value.trim();
+      if (!name || !email) {
+        showTemporaryMessage('Preencha nome e e-mail antes de pagar.', 'error');
+        return actions.reject();
+      }
+      return actions.resolve();
+    },
+    createOrder(data, actions) {
+      const total = getCartTotal();
+      return actions.order.create({
+        purchase_units: [
+          {
+            amount: {
+              currency_code: 'BRL',
+              value: total.toFixed(2),
+            },
+            description: 'Pedido WR3D Impressão 3D',
+          },
+        ],
+        application_context: {
+          shipping_preference: 'NO_SHIPPING',
+        },
+      });
+    },
+    onApprove(data, actions) {
+      return actions.order.capture().then((details) => {
+        const payerName = details.payer?.name?.given_name || 'Cliente';
+        showTemporaryMessage(`Pagamento confirmado. Obrigado, ${payerName}!`, 'success');
+        clearCart();
+        renderOrderPage();
+      });
+    },
+    onError(err) {
+      console.error('PayPal checkout error:', err);
+      showTemporaryMessage('Não foi possível processar o pagamento PayPal. Tente novamente.', 'error');
+    },
+  }).render('#paypal-button-container');
 }
 
 function buildWhatsAppOrderMessage() {
@@ -238,6 +325,7 @@ function initializeSite() {
   if (window.location.pathname.endsWith('order.html')) {
     addItemFromUrl();
     renderOrderPage();
+    renderPayPalButtons();
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
       checkoutForm.addEventListener('submit', submitWhatsAppOrder);
