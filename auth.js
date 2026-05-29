@@ -31,6 +31,11 @@ function getCurrentUser() {
   }
 }
 
+function logoutUser() {
+  localStorage.removeItem(CURRENT_USER_KEY);
+  window.location.href = 'index.html';
+}
+
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
 }

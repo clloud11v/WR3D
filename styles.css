@@ -274,6 +274,110 @@ button, a {
 .button:hover {
   transform: translateY(-2px);
 }
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.order-section {
+  padding-bottom: 4rem;
+}
+.order-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1.5fr 1fr;
+  margin-top: 2rem;
+}
+.cart-list {
+  display: grid;
+  gap: 1rem;
+}
+.cart-empty {
+  padding: 2rem;
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+.cart-empty p {
+  margin: 0 0 1.5rem;
+  color: #cbd5e1;
+}
+.cart-item {
+  padding: 1.5rem;
+  border-radius: 1.8rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+.cart-item p {
+  margin: 0.35rem 0 0;
+  color: #cbd5e1;
+}
+.cart-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+.checkout-panel {
+  display: grid;
+}
+.checkout-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1.5rem 0 2rem;
+}
+.checkout-summary span {
+  color: #cbd5e1;
+}
+.checkout-summary strong {
+  font-size: 1.7rem;
+}
+.checkout-form label {
+  display: grid;
+  gap: 0.6rem;
+  color: #cbd5e1;
+}
+.checkout-form input,
+.checkout-form textarea {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+}
+.checkout-form textarea {
+  resize: vertical;
+}
+.toast-message {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 999;
+}
+.toast-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast-message.success {
+  background: rgba(34, 197, 94, 0.95);
+}
+.toast-message.error {
+  background: rgba(239, 68, 68, 0.95);
+}
 .site-footer {
   margin: 3rem auto 0;
   max-width: 1180px;
