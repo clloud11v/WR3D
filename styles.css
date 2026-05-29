@@ -430,6 +430,44 @@ button, a {
   }
 }
 
+/* Card glass refinements */
+.card,
+.nav-card,
+.payment-card,
+.contact-card,
+.process-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 14px 40px rgba(3,10,24,0.12);
+  backdrop-filter: blur(6px) saturate(120%);
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.nav-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  border-image: linear-gradient(90deg, rgba(124,58,237,0.9), rgba(236,72,153,0.7)) 1;
+  border-color: transparent;
+}
+
+.card .button,
+.nav-card .button {
+  border-radius: 1.25rem;
+}
+
+/* Subtle inset for content areas */
+.contact-card,
+.payment-card {
+  padding: 2rem;
+}
+
+/* Slightly stronger panel accent */
+.panel-label {
+  background: linear-gradient(90deg, rgba(124,58,237,0.08), rgba(236,72,153,0.06));
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+}
+
+
 /* --- Visual polish: modern rounded cards, depth, and refined hero --- */
 :root {
   --card-bg: rgba(255,255,255,0.03);
