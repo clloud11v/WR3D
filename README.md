@@ -1,59 +1,56 @@
-# WR3D
+WR3D — Site estático de comércio (projeto local)
+===============================================
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.13.
+Resumo
+-----
 
-## Development server
+Projeto estático com páginas HTML/CSS/JS para catálogo, carrinho, checkout e administração local (sem backend). Use para prototipagem local e deploy em hosting estático.
 
-To start a local development server, run:
+Testar localmente
+-----------------
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Opção rápida com Python (porta 8000):
 
 ```bash
-ng generate component component-name
+cd "caminho/para/WR3D"
+python -m http.server 8000
+# então abra http://localhost:8000/pedidos.html
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Opção com `npx serve`:
 
 ```bash
-ng generate --help
+npx serve . -p 8000
+# ou: npx http-server -p 8000
 ```
 
-## Building
+Deploy estático (opções)
+-----------------------
 
-To build the project run:
+- GitHub Pages (para repositórios públicos):
+  1. No GitHub, vá em Settings → Pages e selecione a branch `main` (pasta `/`).
+  2. Aguarde alguns minutos; o site ficará disponível em https://<seu-usuario>.github.io/<repo>.
 
-```bash
-ng build
-```
+- Netlify / Vercel:
+  1. Conecte o repositório no painel do serviço.
+  2. Configure como um deploy estático (build command vazio). O serviço detectará o projeto e fará o deploy.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Notas sobre dados locais
+-----------------------
 
-## Running unit tests
+O projeto persiste produtos, usuários e pedidos no `localStorage` do navegador sob as chaves:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+- `wr3d-products`
+- `wr3d-users`
+- `wr3d-current-user`
+- `wr3d-cart`
+- `wr3d-orders`
 
-```bash
-ng test
-```
+Ao abrir `pedidos.html` pela primeira vez, um pedido de exemplo é gerado automaticamente (seed) quando não há pedidos no storage.
 
-## Running end-to-end tests
+Próximos passos sugeridos
+------------------------
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Adicionar testes automatizados ou CI (GitHub Actions) para verificação de build.
+- Mover dados para um backend ou armazenar pedidos em um endpoint para produção.
+- Criar um workflow de release automatizado.
