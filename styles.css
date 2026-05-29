@@ -562,6 +562,20 @@ button, a {
   grid-template-columns: 1fr 1fr;
   margin-top: 1.8rem;
 }
+.auth-message {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1.25rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: none;
+}
+.auth-message.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+  border-color: rgba(239, 68, 68, 0.2);
+}
 .auth-card {
   padding: 2rem;
   border-radius: 1.8rem;
@@ -622,17 +636,20 @@ button, a {
   color: #64748b;
   font-weight: 700;
 }
-.login-form {
+.login-form,
+.register-form {
   display: grid;
   gap: 1rem;
 }
-.login-form label {
+.login-form label,
+.register-form label {
   display: grid;
   gap: 0.5rem;
   font-weight: 600;
   color: #334155;
 }
-.login-form input {
+.login-form input,
+.register-form input {
   width: 100%;
   padding: 0.95rem 1rem;
   border-radius: 1rem;
