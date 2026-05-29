@@ -486,6 +486,60 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
+/* --- Micro-animations: entry, hover glows and staggered cards --- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.cards-grid .card {
+  animation: fadeUp var(--anim-medium) ease both;
+}
+.cards-grid .card:nth-child(1) { animation-delay: 40ms; }
+.cards-grid .card:nth-child(2) { animation-delay: 120ms; }
+.cards-grid .card:nth-child(3) { animation-delay: 200ms; }
+
+/* Button hover glow using pseudo-element */
+.button {
+  position: relative;
+  overflow: hidden;
+}
+.button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.06), transparent 25%),
+              linear-gradient(90deg, rgba(124,58,237,0.12), rgba(236,72,153,0.06));
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
+}
+.button:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* subtle tilt on hover for interactive cards */
+.card:hover {
+  transform: translateY(-8px) rotateZ(-0.3deg) scale(1.01);
+}
+
+/* small transition for nav links */
+.main-nav a {
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+.main-nav a:hover {
+  transform: translateY(-3px);
+}
+
+
 
 /* Card glass refinements */
 .card,
