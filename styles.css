@@ -430,6 +430,63 @@ button, a {
   }
 }
 
+/* Inputs, buttons and micro-interactions */
+:root {
+  --anim-fast: 120ms;
+  --anim-medium: 220ms;
+  --anim-slow: 420ms;
+}
+
+/* Button motion and focus */
+.button,
+.social-button {
+  transition: transform var(--anim-fast) ease, box-shadow var(--anim-fast) ease, opacity var(--anim-fast) ease;
+  will-change: transform;
+}
+.button:hover {
+  transform: translateY(-6px);
+}
+.button:active {
+  transform: translateY(-2px) scale(0.997);
+}
+.button:focus,
+.social-button:focus {
+  outline: 3px solid rgba(124,58,237,0.16);
+  outline-offset: 3px;
+  box-shadow: 0 8px 30px rgba(124,58,237,0.08);
+}
+
+/* Inputs & selects focus */
+input, textarea, select {
+  transition: box-shadow var(--anim-fast) ease, border-color var(--anim-fast) ease, transform var(--anim-fast) ease;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: rgba(124,58,237,0.9);
+  box-shadow: 0 12px 40px rgba(124,58,237,0.08);
+  transform: translateY(-2px);
+}
+
+/* Subtle floating for hero glow */
+@keyframes floatY {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+.hero-glow {
+  animation: floatY var(--anim-slow) ease-in-out infinite;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+
 /* Card glass refinements */
 .card,
 .nav-card,
