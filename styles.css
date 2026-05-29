@@ -51,7 +51,7 @@ button, a {
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   background: linear-gradient(135deg, #7c3aed, #ec4899);
   color: #fff;
   font-weight: 800;
@@ -96,7 +96,7 @@ button, a {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 2rem;
+  border-radius: 2.5rem;
   background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
   pointer-events: none;
 }
@@ -167,7 +167,7 @@ button, a {
   width: 100%;
   max-width: 460px;
   padding: 2.2rem;
-  border-radius: 2rem;
+  border-radius: 2.5rem;
   background: rgba(15, 23, 42, 0.88);
   border: 1px solid rgba(124, 58, 237, 0.35);
   box-shadow: 0 40px 90px rgba(15, 23, 42, 0.35);
@@ -295,7 +295,7 @@ button, a {
 }
 .cart-empty {
   padding: 2rem;
-  border-radius: 1.8rem;
+  border-radius: 2rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
@@ -306,7 +306,7 @@ button, a {
 }
 .cart-item {
   padding: 1.5rem;
-  border-radius: 1.8rem;
+  border-radius: 2rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -348,7 +348,7 @@ button, a {
 .checkout-form textarea {
   width: 100%;
   padding: 0.95rem 1rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: #f8fafc;
@@ -359,7 +359,7 @@ button, a {
 .paypal-section {
   margin-top: 2rem;
   padding: 1.5rem;
-  border-radius: 1.5rem;
+  border-radius: 2rem;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -398,7 +398,7 @@ button, a {
   margin: 3rem auto 0;
   max-width: 1180px;
   padding: 2rem;
-  border-radius: 1.8rem;
+  border-radius: 2rem;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -532,7 +532,7 @@ button, a {
 .register-form input {
   width: 100%;
   padding: 0.95rem 1rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
   color: #f8fafc;
