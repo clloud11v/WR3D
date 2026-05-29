@@ -356,6 +356,22 @@ button, a {
 .checkout-form textarea {
   resize: vertical;
 }
+.paypal-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.paypal-section p {
+  margin: 0 0 1rem;
+  color: #cbd5e1;
+}
+.paypal-note {
+  margin-top: 1rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
 .toast-message {
   position: fixed;
   bottom: 1.5rem;
