@@ -430,6 +430,119 @@ button, a {
   }
 }
 
+/* --- Visual polish: modern rounded cards, depth, and refined hero --- */
+:root {
+  --card-bg: rgba(255,255,255,0.03);
+  --card-border: rgba(255,255,255,0.06);
+  --glass-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --accent-glow: rgba(124,58,237,0.18);
+  --elev-small: 0 10px 30px rgba(3,10,24,0.12);
+  --elev-large: 0 30px 80px rgba(3,10,24,0.25);
+}
+
+/* Hero refinements */
+.hero-panel {
+  background: rgba(10,14,24,0.78);
+  border: 1px solid rgba(124,58,237,0.28);
+  box-shadow: var(--elev-large);
+  transform: translateZ(0);
+}
+.hero-copy h1 {
+  text-shadow: 0 6px 30px rgba(2,6,23,0.6);
+}
+.hero-visual {
+  transform: translateY(-6px);
+  transition: transform 420ms cubic-bezier(.2,.9,.2,1);
+}
+.hero-panel:hover ~ .hero-visual,
+.hero-visual:hover {
+  transform: translateY(-12px) scale(1.02);
+}
+
+/* Cards & panels: softer glass and deeper shadow */
+.card,
+.nav-card,
+.payment-card,
+.contact-card,
+.process-card,
+.faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--elev-small);
+  transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
+}
+.card:hover,
+.nav-card:hover,
+.payment-card:hover {
+  box-shadow: var(--elev-large);
+  transform: translateY(-6px);
+  border-color: rgba(124,58,237,0.30);
+}
+
+/* Emphasize headings inside cards */
+.card h3,
+.nav-card h3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #f8fafc;
+}
+.card p {
+  color: #cbd5e1;
+  opacity: 0.95;
+}
+
+/* Inputs & form controls */
+.checkout-form input,
+.checkout-form textarea,
+.login-form input,
+.register-form input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  transition: box-shadow 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.checkout-form input:focus,
+.checkout-form textarea:focus,
+.login-form input:focus,
+.register-form input:focus {
+  outline: none;
+  border-color: rgba(124,58,237,0.9);
+  box-shadow: 0 6px 30px rgba(124,58,237,0.12);
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+.button.primary {
+  box-shadow: 0 18px 50px rgba(124,58,237,0.22);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.button.primary:active {
+  transform: translateY(1px) scale(0.997);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.16);
+}
+
+/* Small UI polish */
+.cart-item {
+  gap: 1.25rem;
+}
+.paypal-section {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.05);
+}
+
+/* Micro-interaction for FAQ summary */
+.faq-item[open] {
+  transform: translateY(-6px);
+  box-shadow: var(--elev-large);
+}
+
+/* improve readability on accent sections */
+.accent {
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(124,58,237,0.02));
+  border-color: rgba(124,58,237,0.12);
+}
+
+
 /* Modern rounded overrides */
 :root {
   --radius-sm: 1rem;
