@@ -47,6 +47,118 @@ function getCurrentUser() {
   }
 }
 
+async function loadFirebaseConfigFromFile() {
+  if (window.FIREBASE_CONFIG) {
+    return;
+  }
+  try {
+    const response = await fetch('firebase-config.js');
+    if (!response.ok) return;
+    const scriptText = await response.text();
+    if (scriptText.includes('window.FIREBASE_CONFIG')) {
+      // eslint-disable-next-line no-eval
+      eval(scriptText);
+    }
+  } catch (error) {
+    console.warn('WR3D: unable to load firebase-config.js', error);
+  }
+}
+
+async function loadFirebaseUIAssets() {
+  if (window.firebaseui) {
+    return;
+  }
+
+  const existingCss = document.querySelector('link[href*="firebaseui"]');
+  if (!existingCss) {
+    const cssLink = document.createElement('link');
+    cssLink.rel = 'stylesheet';
+    cssLink.href = 'https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css';
+    document.head.appendChild(cssLink);
+  }
+
+  if (!window.firebaseui) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+}
+
+function mapFirebaseUserToCurrentUser(fbUser, isAdmin = false) {
+  if (!fbUser) {
+    return null;
+  }
+  return {
+    name: fbUser.displayName || fbUser.email.split('@')[0],
+    email: fbUser.email,
+    admin: !!isAdmin,
+    provider: fbUser.providerData && fbUser.providerData[0] ? fbUser.providerData[0].providerId : 'firebase',
+    createdAt: new Date().toISOString(),
+  };
+}
+
+async function initFirebaseAuthUI() {
+  await loadFirebaseConfigFromFile();
+  if (!window.FIREBASE_CONFIG) {
+    return;
+  }
+  if (!window.firebase) {
+    return;
+  }
+
+  await loadFirebaseUIAssets();
+
+  const container = document.getElementById('firebaseui-auth-container');
+  if (!container || !window.firebaseui || !window.firebase.auth) {
+    return;
+  }
+
+  container.style.display = 'block';
+
+  const uiConfig = {
+    signInSuccessUrl: 'index.html',
+    signInOptions: [
+      window.firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      window.firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      window.firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      window.firebase.auth.AppleAuthProvider.PROVIDER_ID,
+    ],
+    tosUrl: '#',
+    privacyPolicyUrl: '#',
+    callbacks: {
+      signInSuccessWithAuthResult: async (authResult) => {
+        const fbUser = authResult.user;
+        let isAdmin = false;
+        try {
+          const tokenResult = await fbUser.getIdTokenResult();
+          isAdmin = !!tokenResult.claims?.admin;
+        } catch (e) {
+          console.warn('WR3D: unable to fetch custom claims', e);
+        }
+        if (!isAdmin && Array.isArray(window.FIREBASE_ADMIN_EMAILS)) {
+          isAdmin = window.FIREBASE_ADMIN_EMAILS.includes(fbUser.email);
+        }
+        const mapped = mapFirebaseUserToCurrentUser(fbUser, isAdmin);
+        setCurrentUser(mapped);
+        showMessage(`Login via Firebase concluído. Bem-vindo, ${mapped.name}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 900);
+        return false;
+      },
+    },
+  };
+
+  const ui = window.firebaseui.auth.AuthUI.getInstance() || new window.firebaseui.auth.AuthUI(window.firebase.auth());
+  ui.start('#firebaseui-auth-container', uiConfig);
+}
+
+window.initFirebaseAuthUI = initFirebaseAuthUI;
+
 function ensureAdminAccounts() {
   const users = getUsers();
   let changed = false;

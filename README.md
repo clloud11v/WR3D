@@ -64,20 +64,32 @@ Este projeto suporta uma integração cliente-only com Firestore e Firebase Auth
 1. Crie um projeto no Firebase Console e ative Firestore e Authentication (e-mail/password).
 2. Copie `firebase-config.example.js` para `firebase-config.js` na raiz do projeto e preencha os valores.
 3. (Opcional) Em `firebase-config.js` ajuste `window.FIREBASE_ADMIN_EMAILS` com e-mails de administradores.
-4. Configure Firestore Security Rules — em desenvolvimento você pode usar regras amplas, mas em produção restrinja gravações apenas a administradores (use custom claims or security rules verifying email).
+4. **Copie as Security Rules do arquivo `firestore.rules` para o console do Firebase:**
+   - No Firebase Console, navegue para Firestore Database → Rules.
+   - Cole o conteúdo de `firestore.rules` e publique.
 
 Com isso o site irá:
 - carregar automaticamente o SDK do Firebase quando `firebase-config.js` estiver presente;
 - sincronizar em tempo real as coleções `products` e `orders` para todos os clientes;
-- mapear o usuário autenticado do Firebase para o usuário local (`wr3d-current-user`) — se o usuário for administrador (por claim ou lista de e-mails) ele ganhará acesso ao painel admin.
+- mapear o usuário autenticado do Firebase para o usuário local (`wr3d-current-user`) — se o usuário for administrador (por claim ou lista de e-mails) ele ganhará acesso ao painel admin;
+- usar Firebase UI para login (Google, Facebook, Apple, e-mail) na página de login se o Firebase estiver configurado.
+
+Backend seguro (opcional)
+------------------------
+
+Para operações administrativas com segurança adicional, você pode usar o backend Node.js fornecido em `backend/`:
+
+1. Navegue para `backend/`.
+2. Crie `.env` e `service-account.json` (veja `backend/README.md` para detalhes).
+3. Execute `npm install && npm start`.
+4. O backend oferecerá endpoints REST autenticados para criar produtos e gerenciar pedidos.
+
+Veja `backend/README.md` para instruções completas e endpoints disponíveis.
 
 Segurança recomendada
 ---------------------
 
-- Utilize Firebase Auth + custom claims para marcar contas administrativas e aplique Firestore Security Rules que permitam gravações apenas a administradores.
-- Evite confiar apenas em `FIREBASE_ADMIN_EMAILS` em produção — prefira claims ou um backend que valide permissões.
-
-Se quiser, posso:
-- adicionar um `firebase-config.example.js` (já incluído) e um snippet de `security.rules` sugerido;
-- implementar fluxo de login via Firebase UI no site;
-- ou criar um endpoint simples que faça writes autenticados para Firestore com um token do servidor.
+- **Firestore Rules**: Use as regras fornecidas em `firestore.rules`. Permitem leitura pública de produtos, mas escrita apenas para admins.
+- **Custom Claims**: Em produção, use custom claims do Firebase Auth para marcar admins, em vez de apenas uma lista de e-mails.
+- **Backend**: Para operações críticas, prefira usar o backend seguro (`backend/server.js`) — ele valida permissões com Firebase Admin SDK.
+- **HTTPS**: sempre use HTTPS em produção.

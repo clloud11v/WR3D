@@ -1,0 +1,5 @@
+# This file should not be tracked by Git
+node_modules/
+*.log
+.env
+service-account.json

@@ -75,8 +75,30 @@ function setProducts(products) {
   localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 }
 
+async function loadFirebaseConfigFromFile() {
+  if (window.FIREBASE_CONFIG) {
+    return;
+  }
+
+  try {
+    const response = await fetch('firebase-config.js');
+    if (!response.ok) {
+      return;
+    }
+    const scriptText = await response.text();
+    // Evaluate only if the file actually exports a config object.
+    if (scriptText.includes('window.FIREBASE_CONFIG')) {
+      // eslint-disable-next-line no-eval
+      eval(scriptText);
+    }
+  } catch (error) {
+    console.warn('WR3D: unable to load firebase-config.js', error);
+  }
+}
+
 async function initFirebaseIfConfigured() {
   // `firebase-config.js` should set `window.FIREBASE_CONFIG = { apiKey, authDomain, projectId, ... }`.
+  await loadFirebaseConfigFromFile();
   if (!window.FIREBASE_CONFIG) {
     return;
   }
@@ -155,6 +177,9 @@ async function initFirebaseIfConfigured() {
     // Start listening for remote changes
     subscribeRemoteProducts();
     subscribeRemoteOrders();
+    if (window.initFirebaseAuthUI) {
+      window.initFirebaseAuthUI();
+    }
     console.log('WR3D: Firebase initialized, remote sync active.');
   } catch (e) {
     console.warn('WR3D: Firebase initialization failed', e);
@@ -205,7 +230,13 @@ function subscribeRemoteOrders() {
   coll.onSnapshot((snapshot) => {
     applyingRemoteUpdate = true;
     const orders = [];
-    snapshot.forEach((doc) => orders.push({ id: doc.id, ...doc.data() }));
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        data.createdAt = data.createdAt.toDate().toISOString();
+      }
+      orders.push({ id: doc.id, ...data });
+    });
     if (orders.length) {
       setOrders(orders);
       if (window.location.pathname.endsWith('pedidos.html')) {
@@ -659,12 +690,12 @@ function updateHeaderAuth() {
   }
 }
 
-function initializeSite() {
+async function initializeSite() {
   renderProductCatalog();
   updateCartIndicator();
   updateHeaderAuth();
   // initialize Firebase sync if config is present
-  initFirebaseIfConfigured();
+  await initFirebaseIfConfigured();
 
   document.querySelectorAll('.add-to-cart').forEach((button) => {
     button.addEventListener('click', (event) => {
