@@ -90,7 +90,14 @@ async function initFirebaseIfConfigured() {
         s1.onload = () => {
           const s2 = document.createElement('script');
           s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
-          s2.onload = resolve;
+          s2.onload = () => {
+            // optionally load auth SDK after firestore
+            const s3 = document.createElement('script');
+            s3.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+            s3.onload = resolve;
+            s3.onerror = reject;
+            document.head.appendChild(s3);
+          };
           s2.onerror = reject;
           document.head.appendChild(s2);
         };
@@ -103,6 +110,47 @@ async function initFirebaseIfConfigured() {
     firestoreDb = window.firebase.firestore();
     FIREBASE_ENABLED = true;
     remoteSyncEnabled = true;
+
+    // If auth is available, wire auth state to local session
+    if (window.firebase && window.firebase.auth) {
+      window.firebase.auth().onAuthStateChanged(async (fbUser) => {
+        if (fbUser) {
+          let isAdmin = false;
+          try {
+            const token = await fbUser.getIdTokenResult();
+            if (token && token.claims && token.claims.admin) {
+              isAdmin = true;
+            }
+          } catch (e) {
+            // ignore
+          }
+
+          // fallback: check admin emails list if provided
+          if (!isAdmin && window.FIREBASE_ADMIN_EMAILS && Array.isArray(window.FIREBASE_ADMIN_EMAILS)) {
+            isAdmin = window.FIREBASE_ADMIN_EMAILS.includes(fbUser.email);
+          }
+
+          // map firebase user to local current user
+          try {
+            const mapped = {
+              name: fbUser.displayName || fbUser.email.split('@')[0],
+              email: fbUser.email,
+              admin: !!isAdmin,
+              provider: fbUser.providerData && fbUser.providerData[0] ? fbUser.providerData[0].providerId : 'firebase',
+              createdAt: new Date().toISOString(),
+            };
+            if (typeof setCurrentUser === 'function') {
+              setCurrentUser(mapped);
+              updateHeaderAuth();
+            }
+          } catch (e) {
+            console.warn('WR3D: failed to map firebase user to local session', e);
+          }
+        } else {
+          // signed out — do not force logout of local accounts
+        }
+      });
+    }
 
     // Start listening for remote changes
     subscribeRemoteProducts();
@@ -170,18 +218,15 @@ function subscribeRemoteOrders() {
 
 async function pushProductsToRemote(products) {
   if (!firestoreDb) return;
-  const batch = firestoreDb.batch();
   const coll = firestoreDb.collection('products');
-  // naive: replace all docs with local products
-  const snapshot = await coll.get();
-  snapshot.forEach((doc) => batch.delete(doc.ref));
-  products.forEach((p) => {
+  // upsert each product (set by id) — do not delete unmatched remote docs here
+  const ops = products.map((p) => {
     const ref = coll.doc(p.id.toString());
     const copy = { ...p };
     delete copy.id;
-    batch.set(ref, copy);
+    return ref.set(copy);
   });
-  await batch.commit();
+  await Promise.all(ops);
 }
 
 async function pushOrderToRemote(order) {

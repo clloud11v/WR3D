@@ -54,3 +54,30 @@ Próximos passos sugeridos
 - Adicionar testes automatizados ou CI (GitHub Actions) para verificação de build.
 - Mover dados para um backend ou armazenar pedidos em um endpoint para produção.
 - Criar um workflow de release automatizado.
+
+Integração com Firebase (opcional)
+---------------------------------
+
+Para sincronização em tempo real entre todos os usuários (admin e clientes), você pode usar Firestore.
+Este projeto suporta uma integração cliente-only com Firestore e Firebase Auth. Passos rápidos:
+
+1. Crie um projeto no Firebase Console e ative Firestore e Authentication (e-mail/password).
+2. Copie `firebase-config.example.js` para `firebase-config.js` na raiz do projeto e preencha os valores.
+3. (Opcional) Em `firebase-config.js` ajuste `window.FIREBASE_ADMIN_EMAILS` com e-mails de administradores.
+4. Configure Firestore Security Rules — em desenvolvimento você pode usar regras amplas, mas em produção restrinja gravações apenas a administradores (use custom claims or security rules verifying email).
+
+Com isso o site irá:
+- carregar automaticamente o SDK do Firebase quando `firebase-config.js` estiver presente;
+- sincronizar em tempo real as coleções `products` e `orders` para todos os clientes;
+- mapear o usuário autenticado do Firebase para o usuário local (`wr3d-current-user`) — se o usuário for administrador (por claim ou lista de e-mails) ele ganhará acesso ao painel admin.
+
+Segurança recomendada
+---------------------
+
+- Utilize Firebase Auth + custom claims para marcar contas administrativas e aplique Firestore Security Rules que permitam gravações apenas a administradores.
+- Evite confiar apenas em `FIREBASE_ADMIN_EMAILS` em produção — prefira claims ou um backend que valide permissões.
+
+Se quiser, posso:
+- adicionar um `firebase-config.example.js` (já incluído) e um snippet de `security.rules` sugerido;
+- implementar fluxo de login via Firebase UI no site;
+- ou criar um endpoint simples que faça writes autenticados para Firestore com um token do servidor.
