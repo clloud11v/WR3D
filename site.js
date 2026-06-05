@@ -439,7 +439,7 @@ function renderOrdersPage() {
           <strong>Pedido ${order.id}</strong>
           <span>${new Date(order.createdAt).toLocaleString('pt-BR')}</span>
         </div>
-        <div class="meta">${order.method} • ${order.status} • R$ ${order.total.toFixed(2).replace('.', ',')}</div>
+        <div class="meta"><span class="order-method">${order.method}</span> • <span class="order-status" data-status="${order.status}">${order.status}</span> • <span class="order-total">R$ ${order.total.toFixed(2).replace('.', ',')}</span></div>
         <div class="order-buyer">${order.buyerName} • ${order.buyerEmail}</div>
         <ul class="order-items">
           ${order.items

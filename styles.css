@@ -441,8 +441,11 @@ button, a {
   margin: 0.6rem 0 0;
   padding-left: 0;
   color: #d1d9e6;
-  display: inline-block;
-  text-align: center;
+  display: block;
+  text-align: left;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .order-items li {
   margin: 0.45rem 0;
@@ -450,6 +453,28 @@ button, a {
 }
 .order-card p em {
   color: #aab6c6;
+}
+
+/* Status badge */
+.order-status {
+  display: inline-block;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #041025;
+  margin: 0 0.35rem;
+}
+.order-status[data-status="Pendente"] { background: #f59e0b; color: #081214; }
+.order-status[data-status="Concluído"] { background: #10b981; color: #042018; }
+.order-status[data-status="Cancelado"] { background: #ef4444; color: #1b0b0b; }
+.order-status[data-status="Em andamento"] { background: #60a5fa; color: #03102a; }
+
+/* Responsive: ensure order-items remain readable */
+@media (max-width: 700px) {
+  .order-items { max-width: 100%; padding-left: 0; }
+  .cards-grid { grid-template-columns: 1fr; }
 }
 
 .cart-list {
