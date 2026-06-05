@@ -2,6 +2,13 @@ const CART_KEY = 'wr3d-cart';
 const PRODUCTS_KEY = 'wr3d-products';
 const ORDERS_KEY = 'wr3d-orders';
 
+// Remote sync state (Firebase Firestore)
+let FIREBASE_ENABLED = false;
+let firebaseApp = null;
+let firestoreDb = null;
+let remoteSyncEnabled = false;
+let applyingRemoteUpdate = false;
+
 const DEFAULT_PRODUCTS = [
   {
     id: 'miniaturas',
@@ -68,6 +75,44 @@ function setProducts(products) {
   localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 }
 
+async function initFirebaseIfConfigured() {
+  // `firebase-config.js` should set `window.FIREBASE_CONFIG = { apiKey, authDomain, projectId, ... }`.
+  if (!window.FIREBASE_CONFIG) {
+    return;
+  }
+
+  try {
+    // Load Firebase app and firestore compat from CDN if not already loaded
+    if (!window.firebase) {
+      await new Promise((resolve, reject) => {
+        const s1 = document.createElement('script');
+        s1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+        s1.onload = () => {
+          const s2 = document.createElement('script');
+          s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+          s2.onload = resolve;
+          s2.onerror = reject;
+          document.head.appendChild(s2);
+        };
+        s1.onerror = reject;
+        document.head.appendChild(s1);
+      });
+    }
+
+    firebaseApp = window.firebase.initializeApp(window.FIREBASE_CONFIG);
+    firestoreDb = window.firebase.firestore();
+    FIREBASE_ENABLED = true;
+    remoteSyncEnabled = true;
+
+    // Start listening for remote changes
+    subscribeRemoteProducts();
+    subscribeRemoteOrders();
+    console.log('WR3D: Firebase initialized, remote sync active.');
+  } catch (e) {
+    console.warn('WR3D: Firebase initialization failed', e);
+  }
+}
+
 function getOrders() {
   try {
     return JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
@@ -84,6 +129,71 @@ function saveOrder(order) {
   const orders = getOrders();
   orders.unshift(order);
   setOrders(orders);
+  // push to remote if enabled
+  if (remoteSyncEnabled && FIREBASE_ENABLED && !applyingRemoteUpdate) {
+    pushOrderToRemote(order).catch((e) => console.warn('WR3D: pushOrderToRemote failed', e));
+  }
+}
+
+// Firestore helpers
+function subscribeRemoteProducts() {
+  if (!firestoreDb) return;
+  const coll = firestoreDb.collection('products');
+  coll.onSnapshot((snapshot) => {
+    applyingRemoteUpdate = true;
+    const products = [];
+    snapshot.forEach((doc) => products.push({ id: doc.id, ...doc.data() }));
+    if (products.length) {
+      setProducts(products);
+      renderProductCatalog();
+    }
+    applyingRemoteUpdate = false;
+  });
+}
+
+function subscribeRemoteOrders() {
+  if (!firestoreDb) return;
+  const coll = firestoreDb.collection('orders').orderBy('createdAt', 'desc');
+  coll.onSnapshot((snapshot) => {
+    applyingRemoteUpdate = true;
+    const orders = [];
+    snapshot.forEach((doc) => orders.push({ id: doc.id, ...doc.data() }));
+    if (orders.length) {
+      setOrders(orders);
+      if (window.location.pathname.endsWith('pedidos.html')) {
+        renderOrdersPage();
+      }
+    }
+    applyingRemoteUpdate = false;
+  });
+}
+
+async function pushProductsToRemote(products) {
+  if (!firestoreDb) return;
+  const batch = firestoreDb.batch();
+  const coll = firestoreDb.collection('products');
+  // naive: replace all docs with local products
+  const snapshot = await coll.get();
+  snapshot.forEach((doc) => batch.delete(doc.ref));
+  products.forEach((p) => {
+    const ref = coll.doc(p.id.toString());
+    const copy = { ...p };
+    delete copy.id;
+    batch.set(ref, copy);
+  });
+  await batch.commit();
+}
+
+async function pushOrderToRemote(order) {
+  if (!firestoreDb) return;
+  const coll = firestoreDb.collection('orders');
+  const id = order.id || `order-${Date.now()}`;
+  const copy = { ...order };
+  // ensure createdAt is a Firestore timestamp string or Date
+  if (typeof copy.createdAt === 'string') {
+    copy.createdAt = new Date(copy.createdAt);
+  }
+  await coll.doc(id).set(copy);
 }
 
 function findProduct(id) {
@@ -327,14 +437,14 @@ function renderProductCatalog() {
         addToCart(button.dataset.product);
       }
     });
-  });
-}
-
-function buildWhatsAppOrderMessage() {
-  const cart = getCart();
-  const name = document.getElementById('checkout-name').value.trim();
-  const email = document.getElementById('checkout-email').value.trim();
-  const details = document.getElementById('checkout-notes').value.trim();
+      // Wrap setProducts to also sync remote when admin updates
+      const _setProducts = setProducts;
+      setProducts = function (products) {
+        _setProducts(products);
+        if (remoteSyncEnabled && FIREBASE_ENABLED && !applyingRemoteUpdate) {
+          pushProductsToRemote(products).catch((e) => console.warn('WR3D: pushProductsToRemote failed', e));
+        }
+      };
 
   if (!name || !email) {
     showTemporaryMessage('Preencha nome e e-mail para finalizar o pedido.', 'error');
@@ -508,6 +618,8 @@ function initializeSite() {
   renderProductCatalog();
   updateCartIndicator();
   updateHeaderAuth();
+  // initialize Firebase sync if config is present
+  initFirebaseIfConfigured();
 
   document.querySelectorAll('.add-to-cart').forEach((button) => {
     button.addEventListener('click', (event) => {
